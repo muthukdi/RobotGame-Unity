@@ -8,13 +8,15 @@ public class Robot : MonoBehaviour
 	private bool jumpEnabled;
 	private float runningSpeed;
 	private float jumpingSpeed;
+	private float brakeSpeed;
 	private Vector2 maxVelocity;
 
 	// Use this for initialization
 	void Start ()
 	{
 		runningSpeed = 10.0f;
-		jumpingSpeed = 100.0f;
+		jumpingSpeed = 1000.0f;
+		brakeSpeed = 200.0f;
 		maxVelocity = new Vector2(5.0f, 200.0f);
 		animator = GetComponent<Animator>();
 		jumpEnabled = true;
@@ -101,6 +103,16 @@ public class Robot : MonoBehaviour
 				if (!(Input.GetKey("left") || Input.GetKey("right")))
 				{
 					animator.SetInteger("AnimState", 0); //idle
+					//Brake the momentum
+					if (rigidbody2D.velocity.x < 0.0f)
+					{
+						forceX = brakeSpeed;
+					}
+					else if (rigidbody2D.velocity.x > 0.0f)
+					{
+						forceX = -brakeSpeed;
+					}
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 					break;
 				}
 				// Don't allow repeated jumps (disable it until
@@ -144,7 +156,6 @@ public class Robot : MonoBehaviour
 			}
 			case 2: //jumping
 			{
-				Debug.Log ("Still Jumping");
 				// Determine direction of motion and move the robot
 				if (Input.GetKey("left"))
 				{
