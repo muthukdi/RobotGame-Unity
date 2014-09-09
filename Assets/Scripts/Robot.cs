@@ -16,7 +16,7 @@ public class Robot : MonoBehaviour
 	void Start ()
 	{
 		runningSpeed = 20.0f;
-		jumpingSpeed = 450.0f;
+		jumpingSpeed = 500.0f;
 		brakeSpeed = 50.0f;
 		maxVelocity = new Vector2(5.0f, 200.0f);
 		animator = GetComponent<Animator>();
