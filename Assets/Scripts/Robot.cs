@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class Robot : MonoBehaviour
@@ -11,6 +11,9 @@ public class Robot : MonoBehaviour
 	private float brakeSpeed;
 	private Vector2 maxVelocity;
 	public AudioClip jumpSound;
+	public AudioClip blockSound;
+	public float airDragCoefficient;
+	private float velocityY;
 
 	// Use this for initialization
 	void Start ()
@@ -21,16 +24,49 @@ public class Robot : MonoBehaviour
 		maxVelocity = new Vector2(5.0f, 200.0f);
 		animator = GetComponent<Animator>();
 		jumpEnabled = true;
+		animator.SetInteger("AnimState", 3);
+		airDragCoefficient = 0.5f;
 	}
 
 	// collision callback
 	void OnCollisionEnter2D(Collision2D coll)
 	{
+		// When the robot collides with a floor
 		if (coll.gameObject.tag == "floor")
 		{
-			animator.SetInteger("AnimState", 0); //idle
+			// on its way down
+			if (velocityY < -0.2f)
+			{
+				animator.SetInteger("AnimState", 0); //idle
+			}
+			// on its way up
+			else if (velocityY > 0.2f)
+			{
+				if (blockSound)
+				{
+					AudioSource.PlayClipAtPoint(blockSound, transform.position);
+				}
+			}
+			// Maybe crossing from one tile to another
+			else
+			{
+				// Do nothing
+			}
 		}
 	}
+
+	// Stop colliding with something
+	/*void OnCollisionExit2D(Collision2D coll)
+	{
+		if (coll.gameObject.tag == "floor")
+		{
+			// Either idle or running at the moment
+			if (animator.GetInteger("AnimState") < 2)
+			{
+				animator.SetInteger("AnimState", 3); //falling
+			}
+		}
+	}*/
 
 	// Update is called once per frame
 	void Update()
@@ -39,11 +75,13 @@ public class Robot : MonoBehaviour
 		float forceY = 0.0f;
 		float absVelX = Mathf.Abs(rigidbody2D.velocity.x);
 		float absVelY = Mathf.Abs(rigidbody2D.velocity.y);
+		velocityY = rigidbody2D.velocity.y;
 		// Change behavior according to the current animation state
 		switch (animator.GetInteger("AnimState"))
 		{
 			case 0: //idle
 			{
+				//Debug.Log("Idle");
 				if (Input.GetKey("left") || Input.GetKey("right"))
 				{
 					animator.SetInteger("AnimState", 1); //running
@@ -90,6 +128,7 @@ public class Robot : MonoBehaviour
 			}
 			case 1: //running
 			{
+				//Debug.Log("Running");
 				if (!(Input.GetKey("left") || Input.GetKey("right")))
 				{
 					animator.SetInteger("AnimState", 0); //idle
@@ -149,13 +188,14 @@ public class Robot : MonoBehaviour
 			}
 			case 2: //jumping
 			{
+				//Debug.Log("Jumping");
 				// Determine direction of motion and move the robot
 				if (Input.GetKey("left"))
 				{
 					transform.localScale = new Vector3(-1.835181f, 1.835183f, 1.0f);
 					if (absVelX < maxVelocity.x)
 					{
-						forceX = -runningSpeed;
+						forceX = -runningSpeed * airDragCoefficient;
 					}
 					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				}
@@ -164,7 +204,7 @@ public class Robot : MonoBehaviour
 					transform.localScale = new Vector3(1.835181f, 1.835183f, 1.0f);
 					if (absVelX < maxVelocity.x)
 					{
-						forceX = runningSpeed;
+						forceX = runningSpeed * airDragCoefficient;
 					}
 					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				}
@@ -172,6 +212,26 @@ public class Robot : MonoBehaviour
 		}
 		case 3: //falling
 			{
+				//Debug.Log("Falling");
+				// Determine direction of motion and move the robot
+				if (Input.GetKey("left"))
+				{
+					transform.localScale = new Vector3(-1.835181f, 1.835183f, 1.0f);
+					if (absVelX < maxVelocity.x)
+					{
+						forceX = -runningSpeed * airDragCoefficient;
+					}
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
+				}
+				if (Input.GetKey("right"))
+				{
+					transform.localScale = new Vector3(1.835181f, 1.835183f, 1.0f);
+					if (absVelX < maxVelocity.x)
+					{
+						forceX = runningSpeed * airDragCoefficient;
+					}
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
+				}
 				break;
 			}
 			default:
