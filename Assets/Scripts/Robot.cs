@@ -14,12 +14,20 @@ public class Robot : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		runningSpeed = 10.0f;
-		jumpingSpeed = 1000.0f;
-		brakeSpeed = 200.0f;
+		runningSpeed = 20.0f;
+		jumpingSpeed = 450.0f;
+		brakeSpeed = 30.0f;
 		maxVelocity = new Vector2(5.0f, 200.0f);
 		animator = GetComponent<Animator>();
 		jumpEnabled = true;
+	}
+
+	void OnCollisionEnter2D(Collision2D coll)
+	{
+		if (coll.gameObject.tag == "floor")
+		{
+			animator.SetInteger("AnimState", 0); //idle
+		}
 	}
 	
 	// Update is called once per frame
@@ -65,6 +73,7 @@ public class Robot : MonoBehaviour
 		{
 			case 0: //idle
 			{
+				Debug.Log("Robot is Idle");
 				if (Input.GetKey("left") || Input.GetKey("right"))
 				{
 					animator.SetInteger("AnimState", 1); //running
@@ -100,17 +109,18 @@ public class Robot : MonoBehaviour
 			}
 			case 1: //running
 			{
+				Debug.Log("Robot is Running");
 				if (!(Input.GetKey("left") || Input.GetKey("right")))
 				{
 					animator.SetInteger("AnimState", 0); //idle
 					//Brake the momentum
 					if (rigidbody2D.velocity.x < 0.0f)
 					{
-						forceX = brakeSpeed;
+						forceX = brakeSpeed * absVelX;
 					}
 					else if (rigidbody2D.velocity.x > 0.0f)
 					{
-						forceX = -brakeSpeed;
+						forceX = -brakeSpeed * absVelX;
 					}
 					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 					break;
@@ -156,6 +166,7 @@ public class Robot : MonoBehaviour
 			}
 			case 2: //jumping
 			{
+				Debug.Log("Robot is Jumping");
 				// Determine direction of motion and move the robot
 				if (Input.GetKey("left"))
 				{
