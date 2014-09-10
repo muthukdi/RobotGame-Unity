@@ -24,8 +24,9 @@ public class Robot : MonoBehaviour
 		maxVelocity = new Vector2(5.0f, 200.0f);
 		animator = GetComponent<Animator>();
 		jumpEnabled = true;
-		animator.SetInteger("AnimState", 3);
+		animator.SetInteger("AnimState", 0); //idle
 		airDragCoefficient = 0.5f;
+		Debug.Log (rigidbody2D.velocity.y);
 	}
 
 	// collision callback
@@ -34,7 +35,7 @@ public class Robot : MonoBehaviour
 		// When the robot collides with a floor
 		if (coll.gameObject.tag == "floor")
 		{
-			// on its way down
+			// on its way down (adjust for minor bumps on the surface)
 			if (velocityY < -0.2f)
 			{
 				animator.SetInteger("AnimState", 0); //idle
@@ -56,20 +57,20 @@ public class Robot : MonoBehaviour
 	}
 
 	// Stop colliding with something
-	/*void OnCollisionExit2D(Collision2D coll)
+	void OnCollisionExit2D(Collision2D coll)
 	{
 		if (coll.gameObject.tag == "floor")
 		{
 			// Either idle or running at the moment
-			if (animator.GetInteger("AnimState") < 2)
+			if (rigidbody2D.velocity.y < -0.2)
 			{
 				animator.SetInteger("AnimState", 3); //falling
 			}
 		}
-	}*/
+	}
 
 	// Update is called once per frame
-	void Update()
+	void FixedUpdate()
 	{
 		float forceX = 0.0f;
 		float forceY = 0.0f;
