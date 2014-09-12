@@ -3,7 +3,6 @@ using System.Collections;
 
 public class Robot : MonoBehaviour
 {
-
 	private Animator animator;
 	private bool jumpEnabled;
 	private float runningSpeed;
@@ -14,19 +13,20 @@ public class Robot : MonoBehaviour
 	public AudioClip blockSound;
 	public float airDragCoefficient;
 	private float velocityY;
+	private RobotController controller;
 
 	// Use this for initialization
 	void Start ()
 	{
-		runningSpeed = 20.0f;
-		jumpingSpeed = 500.0f;
-		brakeSpeed = 50.0f;
-		maxVelocity = new Vector2(5.0f, 200.0f);
+		runningSpeed = 10.0f;
+		jumpingSpeed = 250.0f;
+		brakeSpeed = 25.0f;
+		maxVelocity = new Vector2(2.5f, 100.0f);
 		animator = GetComponent<Animator>();
+		controller = GetComponent<RobotController>();
 		jumpEnabled = true;
 		animator.SetInteger("AnimState", 0); //idle
 		airDragCoefficient = 0.5f;
-		Debug.Log (rigidbody2D.velocity.y);
 	}
 
 	// collision callback
@@ -83,21 +83,21 @@ public class Robot : MonoBehaviour
 			case 0: //idle
 			{
 				//Debug.Log("Idle");
-				if (Input.GetKey("left") || Input.GetKey("right"))
+				if (controller.Left || controller.Right)
 				{
 					animator.SetInteger("AnimState", 1); //running
 					// Determine direction of motion and move the robot
-					if (Input.GetKey("left"))
+					if (controller.Left)
 					{
-						transform.localScale = new Vector3(-1.835181f, 1.835183f, 1.0f);
+						transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
 						if (absVelX < maxVelocity.x)
 						{
 							forceX = -runningSpeed;
 						}
 					}
-					if (Input.GetKey("right"))
+					if (controller.Right)
 					{
-						transform.localScale = new Vector3(1.835181f, 1.835183f, 1.0f);
+						transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
 						if (absVelX < maxVelocity.x)
 						{
 							forceX = runningSpeed;
@@ -107,7 +107,7 @@ public class Robot : MonoBehaviour
 				}
 				// Don't allow repeated jumps (disable it until
 				// the button is released)
-				if (Input.GetKey("space") && jumpEnabled)
+				if (controller.Jump && jumpEnabled)
 				{
 					animator.SetInteger("AnimState", 2); //jumping
 					if (absVelY < maxVelocity.y)
@@ -121,7 +121,7 @@ public class Robot : MonoBehaviour
 					}
 					jumpEnabled = false;
 				}
-				else if (!Input.GetKey("space"))
+				else if (!controller.Jump)
 				{
 					jumpEnabled = true;
 				}
@@ -130,7 +130,7 @@ public class Robot : MonoBehaviour
 			case 1: //running
 			{
 				//Debug.Log("Running");
-				if (!(Input.GetKey("left") || Input.GetKey("right")))
+				if (!(controller.Left || controller.Right))
 				{
 					animator.SetInteger("AnimState", 0); //idle
 					//Brake the momentum
@@ -147,7 +147,7 @@ public class Robot : MonoBehaviour
 				}
 				// Don't allow repeated jumps (disable it until
 				// the button is released)
-				if (Input.GetKey("space") && jumpEnabled)
+				if (controller.Jump && jumpEnabled)
 				{
 					animator.SetInteger("AnimState", 2); //jumping
 					if (absVelY < maxVelocity.y)
@@ -162,23 +162,23 @@ public class Robot : MonoBehaviour
 					jumpEnabled = false;
 					break;
 				}
-				else if (!Input.GetKey("space"))
+				else if (!controller.Jump)
 				{
 					jumpEnabled = true;
 				}
 				// Determine direction of motion and move the robot
-				if (Input.GetKey("left"))
+				if (controller.Left)
 				{
-					transform.localScale = new Vector3(-1.835181f, 1.835183f, 1.0f);
+					transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
 					if (absVelX < maxVelocity.x)
 					{
 						forceX = -runningSpeed;
 					}
 					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				}
-				if (Input.GetKey("right"))
+				if (controller.Right)
 				{
-					transform.localScale = new Vector3(1.835181f, 1.835183f, 1.0f);
+					transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
 					if (absVelX < maxVelocity.x)
 					{
 						forceX = runningSpeed;
@@ -191,18 +191,18 @@ public class Robot : MonoBehaviour
 			{
 				//Debug.Log("Jumping");
 				// Determine direction of motion and move the robot
-				if (Input.GetKey("left"))
+				if (controller.Left)
 				{
-					transform.localScale = new Vector3(-1.835181f, 1.835183f, 1.0f);
+					transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
 					if (absVelX < maxVelocity.x)
 					{
 						forceX = -runningSpeed * airDragCoefficient;
 					}
 					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				}
-				if (Input.GetKey("right"))
+				if (controller.Right)
 				{
-					transform.localScale = new Vector3(1.835181f, 1.835183f, 1.0f);
+					transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
 					if (absVelX < maxVelocity.x)
 					{
 						forceX = runningSpeed * airDragCoefficient;
@@ -213,20 +213,20 @@ public class Robot : MonoBehaviour
 		}
 		case 3: //falling
 			{
-				//Debug.Log("Falling");
+				Debug.Log("Falling");
 				// Determine direction of motion and move the robot
-				if (Input.GetKey("left"))
+				if (controller.Left)
 				{
-					transform.localScale = new Vector3(-1.835181f, 1.835183f, 1.0f);
+					transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
 					if (absVelX < maxVelocity.x)
 					{
 						forceX = -runningSpeed * airDragCoefficient;
 					}
 					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				}
-				if (Input.GetKey("right"))
+				if (controller.Right)
 				{
-					transform.localScale = new Vector3(1.835181f, 1.835183f, 1.0f);
+					transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
 					if (absVelX < maxVelocity.x)
 					{
 						forceX = runningSpeed * airDragCoefficient;
