@@ -35,36 +35,18 @@ public class Robot : MonoBehaviour
 		// When the robot collides with a floor
 		if (coll.gameObject.tag == "floor")
 		{
-			// on its way down (adjust for minor bumps on the surface)
-			if (velocityY < -0.2f)
+			// Falling
+			if (animator.GetInteger("AnimState") == 3)
 			{
 				animator.SetInteger("AnimState", 0); //idle
 			}
-			// on its way up
-			else if (velocityY > 0.2f)
+			// Jumping
+			else if (animator.GetInteger("AnimState") == 2)
 			{
 				if (blockSound)
 				{
 					AudioSource.PlayClipAtPoint(blockSound, transform.position);
 				}
-			}
-			// Maybe crossing from one tile to another
-			else
-			{
-				// Do nothing
-			}
-		}
-	}
-
-	// Stop colliding with something
-	void OnCollisionExit2D(Collision2D coll)
-	{
-		if (coll.gameObject.tag == "floor")
-		{
-			// Either idle or running at the moment
-			if (rigidbody2D.velocity.y < -0.2)
-			{
-				animator.SetInteger("AnimState", 3); //falling
 			}
 		}
 	}
@@ -83,6 +65,12 @@ public class Robot : MonoBehaviour
 			case 0: //idle
 			{
 				//Debug.Log("Idle");
+				// Probably falling off the edge of a tile
+				if (velocityY < -0.5)
+				{
+					animator.SetInteger("AnimState", 3); //falling
+					break;
+				}
 				if (controller.Left || controller.Right)
 				{
 					animator.SetInteger("AnimState", 1); //running
@@ -130,6 +118,12 @@ public class Robot : MonoBehaviour
 			case 1: //running
 			{
 				//Debug.Log("Running");
+				// Probably falling off the edge of a tile
+				if (velocityY < -0.5)
+				{
+					animator.SetInteger("AnimState", 3); //falling
+					break;
+				}
 				if (!(controller.Left || controller.Right))
 				{
 					animator.SetInteger("AnimState", 0); //idle
@@ -190,6 +184,12 @@ public class Robot : MonoBehaviour
 			case 2: //jumping
 			{
 				//Debug.Log("Jumping");
+				// Has reached the top of a jump
+				if (velocityY < -0.5)
+				{
+					Debug.Log("Just switched to falling state");
+					animator.SetInteger("AnimState", 3); //falling
+				}
 				// Determine direction of motion and move the robot
 				if (controller.Left)
 				{
@@ -213,7 +213,7 @@ public class Robot : MonoBehaviour
 		}
 		case 3: //falling
 			{
-				Debug.Log("Falling");
+				//Debug.Log("Falling");
 				// Determine direction of motion and move the robot
 				if (controller.Left)
 				{
