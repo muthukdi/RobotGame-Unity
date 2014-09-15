@@ -39,7 +39,7 @@ public class GameController : AIPEventListener
 		bool clientExists = false;
 		for (int i = 0; i < numOfClients; i++)
 		{
-			if (clientId == clientIDs[i])
+			if (clientId.Equals(clientIDs[i]))
 			{
 				clientExists = true;
 				break;
@@ -75,7 +75,9 @@ public class GameController : AIPEventListener
 				float x = -2f + (float)numOfClients/2f;
 				float y = 1.64f;
 				RobotController clone = Instantiate(robot, new Vector3(x, y, 0), Quaternion.identity) as RobotController;
+				Debug.Log ("Before accessing clone");
 				clone.ClientID = clientId;
+				Debug.Log ("After accessing clone");
 				clientIDs[numOfClients] = clientId;
 				numOfClients++;
 			}
