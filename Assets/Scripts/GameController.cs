@@ -74,10 +74,9 @@ public class GameController : AIPEventListener
 				string clientId = queue.Dequeue();
 				float x = -2f + (float)numOfClients/2f;
 				float y = 1.64f;
-				RobotController clone = Instantiate(robot, new Vector3(x, y, 0), Quaternion.identity) as RobotController;
-				Debug.Log ("Before accessing clone");
-				clone.ClientID = clientId;
-				Debug.Log ("After accessing clone");
+				Transform clone = Instantiate(robot, new Vector3(x, y, 0), Quaternion.identity) as Transform;
+				RobotController controller = clone.GetComponent<RobotController>();
+				controller.clientID = clientId;
 				clientIDs[numOfClients] = clientId;
 				numOfClients++;
 			}

@@ -10,24 +10,22 @@ public class RobotController : AIPEventListener
 	private bool LEFT;
 	private bool RIGHT;
 	private bool JUMP;
-	private string clientID;
+	public string clientID;
 
 	// Use this for initialization
 	void Start ()
 	{
-		clientID = "";
+
 	}
 
 	//Respond to events received by the client
 	public override void eventMessage(string name, string data, string clientId)
 	{
-		Debug.Log ("We received a message from a client: " + data); 
-		Debug.Log("Its name is: "+ name);
-		Debug.Log("It came from: "+ clientId); 
-		
+		Debug.Log ("clientId = " + clientId + ", clientID = " + clientID);
 		//Only respond to events from this clientID!
-		if (clientId == clientID)
+		if (clientId.Equals(clientID))
 		{
+			Debug.Log ("Event received: " + name);
 			if (name == "leftevent") 
 			{
 				LEFT = true;
@@ -70,20 +68,6 @@ public class RobotController : AIPEventListener
 		get
 		{
 			return JUMP;
-		}
-	}
-
-	public string ClientID
-	{
-		//set the clientID
-		set
-		{ 
-			clientID = value;
-		}
-		//get the clientID 
-		get
-		{ 
-			return clientID;
 		}
 	}
 	
