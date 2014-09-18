@@ -14,6 +14,7 @@ public class Robot : MonoBehaviour
 	public float airDragCoefficient;
 	private float velocityY;
 	private RobotController controller;
+	private float bouncingSpeed;
 
 	// Use this for initialization
 	void Start ()
@@ -21,6 +22,7 @@ public class Robot : MonoBehaviour
 		runningSpeed = 10.0f;
 		jumpingSpeed = 250.0f;
 		brakeSpeed = 25.0f;
+		bouncingSpeed = 100.0f;
 		maxVelocity = new Vector2(2.5f, 100.0f);
 		animator = GetComponent<Animator>();
 		controller = GetComponent<RobotController>();
@@ -47,6 +49,22 @@ public class Robot : MonoBehaviour
 				{
 					AudioSource.PlayClipAtPoint(blockSound, transform.position);
 				}
+			}
+		}
+		else if (coll.gameObject.tag == "crawler")
+		{
+			float absVelY = Mathf.Abs(rigidbody2D.velocity.y);
+			float forceX = 0.0f;
+			float forceY = 0.0f;
+			// If the robot is falling onto the crawler
+			if (animator.GetInteger("AnimState") == 3)
+			{
+				animator.SetInteger("AnimState", 2); //jumping
+				if (absVelY < maxVelocity.y)
+				{
+					forceY = bouncingSpeed;
+				}
+				rigidbody2D.AddForce(new Vector2(forceX, forceY));
 			}
 		}
 	}
@@ -95,8 +113,9 @@ public class Robot : MonoBehaviour
 				}
 				// Don't allow repeated jumps (disable it until
 				// the button is released)
-				if (controller.Jump && jumpEnabled)
+				if (controller.Jump /*&& jumpEnabled*/)
 				{
+					Debug.Log ("Jump pressed");
 					animator.SetInteger("AnimState", 2); //jumping
 					if (absVelY < maxVelocity.y)
 					{
@@ -107,12 +126,12 @@ public class Robot : MonoBehaviour
 					{
 						AudioSource.PlayClipAtPoint(jumpSound, transform.position);
 					}
-					jumpEnabled = false;
+					//jumpEnabled = false;
 				}
-				else if (!controller.Jump)
+				/*else if (!controller.Jump)
 				{
 					jumpEnabled = true;
-				}
+				}*/
 				break;
 			}
 			case 1: //running
@@ -187,7 +206,6 @@ public class Robot : MonoBehaviour
 				// Has reached the top of a jump
 				if (velocityY < -0.5)
 				{
-					Debug.Log("Just switched to falling state");
 					animator.SetInteger("AnimState", 3); //falling
 				}
 				// Determine direction of motion and move the robot
