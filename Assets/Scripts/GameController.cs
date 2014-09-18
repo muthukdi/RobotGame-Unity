@@ -52,6 +52,9 @@ public class GameController : AIPEventListener
 			Debug.Log("It came from: "+ clientId);
 			lock(this)
 			{
+				Debug.Log("ClientId Enqueue = " + clientId);
+				clientIDs[numOfClients] = clientId;
+				numOfClients++;
 				queue.Enqueue(clientId);
 			}
 		}
@@ -77,8 +80,6 @@ public class GameController : AIPEventListener
 				Transform clone = Instantiate(robot, new Vector3(x, y, 0), Quaternion.identity) as Transform;
 				RobotController controller = clone.GetComponent<RobotController>();
 				controller.clientID = clientId;
-				clientIDs[numOfClients] = clientId;
-				numOfClients++;
 			}
 		}
 	}

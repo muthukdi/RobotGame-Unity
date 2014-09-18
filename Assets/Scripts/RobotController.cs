@@ -12,71 +12,48 @@ public class RobotController : AIPEventListener
 	private bool RIGHT;
 	private bool JUMP;
 	public string clientID;
-	public AIPNetwork myNetwork;
 
 	// Use this for initialization
 	void Start ()
 	{
-		myNetwork = new AIPNetwork(); 
-		myNetwork.Connect();
-		Debug.Log ("myNetwork.Mobicode: " + myNetwork.Mobicode);
+		
 	}
 
-	//Respond to events received by the client
-	/*public override void eventMessage(string name, string data, string clientId)
-	{
-		Debug.Log ("clientId = " + clientId + ", clientID = " + clientID);
-		//Only respond to events from this clientID!
-		if (clientId.Equals(clientID))
-		{
-			Debug.Log ("Event received: " + name);
-			if (name == "leftevent") 
-			{
-				LEFT = true;
-			}
-			if (name == "rightevent")
-			{
-				RIGHT = true;
-			}
-			if (name == "jumpevent")
-			{
-				JUMP = true;
-			}
-		}
-	}*/
-
-	//Display the contents of any messages received from clients
+	//Respond to input events from HTML/JavaScript client controller
 	public override void eventMessage (string name, string data, string clientId)
 	{
-		try
+		if (clientId.Equals(clientID)) 
 		{
-			bool left = false;
-			bool right = false;
-			bool jump = false;
-			if (name == "ControllerEvent") 
+			try
 			{
-				JsonObject json = SimpleJson.SimpleJson.DeserializeObject (data) as JsonObject;
-				left = System.Convert.ToBoolean (json ["left"]);
-				right = System.Convert.ToBoolean (json ["right"]);
-				jump = System.Convert.ToBoolean (json ["jump"]);
-				if (left != LEFT || right != RIGHT || jump != JUMP)
+				bool left = false;
+				bool right = false;
+				bool jump = false;
+				if (name == "ControllerEvent") 
 				{
-					Debug.Log(data);
-				}
-				lock (this)
-				{
-					LEFT = left;
-					RIGHT = right;
-					JUMP = jump;
-				}
-			} 
-	
-		}
-		catch (System.Exception ex)
-		{
-			Debug.Log (ex.Source);
-			Debug.Log (ex.Message);
-			Debug.Log (ex.StackTrace);
+					JsonObject json = SimpleJson.SimpleJson.DeserializeObject (data) as JsonObject;
+					left = System.Convert.ToBoolean (json ["left"]);
+					right = System.Convert.ToBoolean (json ["right"]);
+					jump = System.Convert.ToBoolean (json ["jump"]);
+					if (left != LEFT || right != RIGHT || jump != JUMP)
+					{
+						//Debug.Log(data);
+					}
+					lock (this)
+					{
+						LEFT = left;
+						RIGHT = right;
+						JUMP = jump;
+					}
+				} 
+				
+			}
+			catch (System.Exception ex)
+			{
+				Debug.Log (ex.Source);
+				Debug.Log (ex.Message);
+				Debug.Log (ex.StackTrace);
+			}
 		}
 	}
 
