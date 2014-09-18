@@ -5,20 +5,19 @@ using System.Collections.Generic;
 using AIPFramework;
 using SimpleJson;
 
-public class RobotController : AIPEventListener
-//public class RobotController : MonoBehaviour
+public class AIPPlayerController : AIPEventListener
 {
 	private bool LEFT;
 	private bool RIGHT;
 	private bool JUMP;
 	public string clientID;
-
+	
 	// Use this for initialization
 	void Start ()
 	{
 		
 	}
-
+	
 	//Respond to input events from HTML/JavaScript client controller
 	public override void eventMessage (string name, string data, string clientId)
 	{
@@ -56,7 +55,7 @@ public class RobotController : AIPEventListener
 			}
 		}
 	}
-
+	
 	public bool Left
 	{
 		get
@@ -64,7 +63,7 @@ public class RobotController : AIPEventListener
 			return LEFT;
 		}
 	}
-
+	
 	public bool Right
 	{
 		get
@@ -72,7 +71,7 @@ public class RobotController : AIPEventListener
 			return RIGHT;
 		}
 	}
-
+	
 	public bool Jump
 	{
 		get
@@ -80,12 +79,10 @@ public class RobotController : AIPEventListener
 			return JUMP;
 		}
 	}
-
+	
 	// Update is called once per frame
 	void Update ()
 	{
-		/*LEFT = Input.GetKey("left");
-		RIGHT = Input.GetKey("right");
-		JUMP = Input.GetKey("space");*/
+
 	}
 }

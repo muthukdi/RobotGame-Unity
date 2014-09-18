@@ -27,6 +27,11 @@ public class Crawler : MonoBehaviour
 	// collision callback
 	void OnCollisionEnter2D(Collision2D coll)
 	{
+		// If this script is not enabled
+		if (!enabled)
+		{
+			return;
+		}
 		// When the robot collides with the crawler
 		if (coll.gameObject.tag == "player")
 		{

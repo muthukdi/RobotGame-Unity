@@ -13,6 +13,11 @@ public class Collectible : MonoBehaviour
 	// This coin has been collected by the robot
 	void OnTriggerEnter2D(Collider2D target)
 	{
+		// If this script is not enabled
+		if (!enabled)
+		{
+			return;
+		}
 		if (target.gameObject.tag == "Player")
 		{
 			if (coinSound)

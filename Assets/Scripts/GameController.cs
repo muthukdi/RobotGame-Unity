@@ -78,7 +78,7 @@ public class GameController : AIPEventListener
 				float x = -2f + (float)numOfClients/2f;
 				float y = 1.64f;
 				Transform clone = Instantiate(robot, new Vector3(x, y, 0), Quaternion.identity) as Transform;
-				RobotController controller = clone.GetComponent<RobotController>();
+				AIPPlayerController controller = clone.GetComponent<AIPPlayerController>();
 				controller.clientID = clientId;
 			}
 		}

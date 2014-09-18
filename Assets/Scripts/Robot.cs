@@ -13,7 +13,7 @@ public class Robot : MonoBehaviour
 	public AudioClip blockSound;
 	public float airDragCoefficient;
 	private float velocityY;
-	private RobotController controller;
+	private PlayerController controller;
 	private float bouncingSpeed;
 
 	// Use this for initialization
@@ -25,7 +25,7 @@ public class Robot : MonoBehaviour
 		bouncingSpeed = 100.0f;
 		maxVelocity = new Vector2(2.5f, 100.0f);
 		animator = GetComponent<Animator>();
-		controller = GetComponent<RobotController>();
+		controller = GetComponent<PlayerController>();
 		jumpEnabled = true;
 		animator.SetInteger("AnimState", 0); //idle
 		airDragCoefficient = 0.5f;
@@ -34,6 +34,11 @@ public class Robot : MonoBehaviour
 	// collision callback
 	void OnCollisionEnter2D(Collision2D coll)
 	{
+		// If this script is not enabled
+		if (!enabled)
+		{
+			return;
+		}
 		// When the robot collides with a floor
 		if (coll.gameObject.tag == "floor")
 		{
@@ -113,9 +118,8 @@ public class Robot : MonoBehaviour
 				}
 				// Don't allow repeated jumps (disable it until
 				// the button is released)
-				if (controller.Jump /*&& jumpEnabled*/)
+				if (controller.Jump && jumpEnabled)
 				{
-					Debug.Log ("Jump pressed");
 					animator.SetInteger("AnimState", 2); //jumping
 					if (absVelY < maxVelocity.y)
 					{
@@ -126,12 +130,12 @@ public class Robot : MonoBehaviour
 					{
 						AudioSource.PlayClipAtPoint(jumpSound, transform.position);
 					}
-					//jumpEnabled = false;
+					jumpEnabled = false;
 				}
-				/*else if (!controller.Jump)
+				else if (!controller.Jump)
 				{
 					jumpEnabled = true;
-				}*/
+				}
 				break;
 			}
 			case 1: //running
