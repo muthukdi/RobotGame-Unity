@@ -10,6 +10,7 @@ public class AIPRobot : MonoBehaviour
 	private Vector2 maxVelocity;
 	public AudioClip jumpSound;
 	public AudioClip blockSound;
+	public AudioClip stompSound;
 	public float airDragCoefficient;
 	private float velocityY;
 	private AIPPlayerController controller;
@@ -62,12 +63,20 @@ public class AIPRobot : MonoBehaviour
 			// If the robot is falling onto the crawler
 			if (animator.GetInteger("AnimState") == 3)
 			{
-				animator.SetInteger("AnimState", 2); //jumping
+				// Give it a little bounce
+				animator.SetInteger("AnimState", 2);
 				if (absVelY < maxVelocity.y)
 				{
 					forceY = bouncingSpeed;
 				}
 				rigidbody2D.AddForce(new Vector2(forceX, forceY));
+				// Get the crawler's animator and change its state to dying
+				Animator crawlerAnimator = coll.gameObject.GetComponent<Animator>();
+				crawlerAnimator.SetInteger("AnimState", 2);
+				if (stompSound)
+				{
+					AudioSource.PlayClipAtPoint(stompSound, transform.position);
+				}
 			}
 		}
 	}

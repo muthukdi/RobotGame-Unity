@@ -7,7 +7,6 @@ public class Crawler : MonoBehaviour
 	private float walkingSpeed;
 	private float brakeSpeed;
 	private Vector2 maxVelocity;
-	public AudioClip stompSound;
 	private int direction;
 	private float walkingSpeedScale;
 	//CCTime _nextThinkTime;
@@ -32,21 +31,7 @@ public class Crawler : MonoBehaviour
 		{
 			return;
 		}
-		// When the robot collides with the crawler
-		if (coll.gameObject.tag == "player")
-		{
-			Animator robotAnimator = coll.gameObject.GetComponent<Animator>();
-			// If the robot is falling
-			if (robotAnimator.GetInteger("AnimState") == 3)
-			{
-				animator.SetInteger("AnimState", 2); //dying
-				if (stompSound)
-				{
-					AudioSource.PlayClipAtPoint(stompSound, transform.position);
-				}
-			}
-		}
-		else if (coll.gameObject.tag == "wall")
+		if (coll.gameObject.tag == "wall")
 		{
 			// Face the opposite direction
 			transform.localScale = direction > 0 ? new Vector3(-1.0f, 1.0f, 1.0f) : new Vector3(1.0f, 1.0f, 1.0f);
