@@ -4,28 +4,32 @@ using System.Collections;
 public class Crawler : MonoBehaviour
 {
 	private Animator animator;
-	private float walkingSpeed;
-	private float brakeSpeed;
+	private float walkingForce;
+	private float brakeForce;
 	private Vector2 maxVelocity;
 	private int direction;
-	private float walkingSpeedScale;
 	private float nextThinkTime;
 	private float timeToDeath;
 	private float velocityX;
+	private float[] walkingSpeeds;
 	
 	// Use this for initialization
 	void Start ()
 	{
-		walkingSpeed = 5.0f;
-		brakeSpeed = 25.0f;
-		maxVelocity = new Vector2(1.0f, 0.0f);
+		walkingForce = 10.0f;
+		brakeForce = 25.0f;
 		animator = GetComponent<Animator>();
 		animator.SetInteger("AnimState", 0); //idle
 		animator.speed = 1.0f;
-		walkingSpeedScale = 1.0f;
-		direction = -1;
 		timeToDeath = 0.0f;
 		nextThinkTime = Time.time + 3.0f;
+		walkingSpeeds = new float[3];
+		walkingSpeeds[0] = 0.3f;
+		walkingSpeeds[1] = 0.6f;
+		walkingSpeeds[2] = 0.9f;
+		maxVelocity = new Vector2(walkingSpeeds[Random.Range(0, 3)], 0.0f);
+		direction = Random.Range(0, 2) > 1 ? 1 : -1;
+		transform.localScale = direction < 0 ? new Vector3(1.0f, 1.0f, 1.0f) : new Vector3(-1.0f, 1.0f, 1.0f);
 	}
 
 	// collision callback
@@ -39,9 +43,13 @@ public class Crawler : MonoBehaviour
 		if (coll.gameObject.tag == "wall")
 		{
 			// Face the opposite direction
-			Debug.Log("crawler velocity = " + velocityX);
 			transform.localScale = velocityX > 0 ? new Vector3(1.0f, 1.0f, 1.0f) : new Vector3(-1.0f, 1.0f, 1.0f);
 			direction = velocityX > 0 ? -1 : 1;
+		}
+		else if (coll.gameObject.tag == "crawler")
+		{
+			// Ignore all future collisions with this crawler
+			Physics2D.IgnoreCollision(coll.collider, collider2D);
 		}
 	}
 
@@ -69,10 +77,14 @@ public class Crawler : MonoBehaviour
 		{
 			case 0: //idle
 			{
+				animator.speed = 1.0f;
 				if (Time.time > nextThinkTime)
 				{
-					animator.SetInteger("AnimState", 1);
+					animator.SetInteger("AnimState", 1); //walking
 					nextThinkTime = Time.time + 3.0f;
+					// Change the walking speed randomly
+					maxVelocity = new Vector2(walkingSpeeds[Random.Range(0, 3)], 0.0f);
+					animator.speed = maxVelocity.x/0.3f;
 				}
 				break;
 			}
@@ -85,11 +97,11 @@ public class Crawler : MonoBehaviour
 					//Brake the momentum
 					if (velocityX < 0.0f)
 					{
-						forceX = brakeSpeed * absVelX;
+						forceX = brakeForce * absVelX;
 					}
 					else if (velocityX > 0.0f)
 					{
-						forceX = -brakeSpeed * absVelX;
+						forceX = -brakeForce * absVelX;
 					}
 					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 					break;
@@ -99,7 +111,7 @@ public class Crawler : MonoBehaviour
 				{
 					if (absVelX < maxVelocity.x)
 					{
-						forceX = -walkingSpeed;
+						forceX = -walkingForce;
 					}
 					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				}
@@ -107,7 +119,7 @@ public class Crawler : MonoBehaviour
 				{
 					if (absVelX < maxVelocity.x)
 					{
-						forceX = walkingSpeed;
+						forceX = walkingForce;
 					}
 					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				}
@@ -115,6 +127,7 @@ public class Crawler : MonoBehaviour
 			}
 			case 2: //dying
 			{
+				animator.speed = 1.0f;
 				if (Time.time > timeToDeath)
 				{
 					Destroy(gameObject);
