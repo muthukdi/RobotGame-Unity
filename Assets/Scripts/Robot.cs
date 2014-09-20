@@ -12,10 +12,14 @@ public class Robot : MonoBehaviour
 	public AudioClip jumpSound;
 	public AudioClip blockSound;
 	public AudioClip stompSound;
-	public float airDragCoefficient;
+	public AudioClip dieSound;
+	private float airDragCoefficient;
 	private float velocityY;
 	private PlayerController controller;
 	private float bouncingSpeed;
+	private float fadeOutTime = 0.0f;
+	private Color startColor, endColor;
+	public Transform robot;
 
 	// Use this for initialization
 	void Start ()
@@ -30,6 +34,8 @@ public class Robot : MonoBehaviour
 		jumpEnabled = true;
 		animator.SetInteger("AnimState", 0); //idle
 		airDragCoefficient = 0.5f;
+		startColor = renderer.material.color;
+		endColor = new Color(startColor.r, startColor.g, startColor.b, 0.0f);
 	}
 
 	// collision callback
@@ -62,7 +68,7 @@ public class Robot : MonoBehaviour
 			float absVelY = Mathf.Abs(rigidbody2D.velocity.y);
 			float forceX = 0.0f;
 			float forceY = 0.0f;
-			// If the robot is falling onto the crawler
+			// If the robot is falling onto the crawler, the crawler dies
 			if (animator.GetInteger("AnimState") == 3)
 			{
 				// Give it a little bounce
@@ -79,6 +85,34 @@ public class Robot : MonoBehaviour
 				{
 					AudioSource.PlayClipAtPoint(stompSound, transform.position);
 				}
+				// Set the crawler's time to death
+				coll.gameObject.GetComponent<Crawler>().TimeToDeath = Time.time + 0.5f;
+				// Disabe the crawler's physics components so that it can no longer
+				// interact with the world.
+				coll.collider.enabled = false;
+				coll.rigidbody.isKinematic = true;
+			}
+			// If the robot bumps into the crawler while its idle or running, the robot dies
+			else if (animator.GetInteger("AnimState") < 2)
+			{
+				// Give it a little bounce
+				animator.SetInteger("AnimState", 4);
+				if (absVelY < maxVelocity.y)
+				{
+					forceY = bouncingSpeed;
+				}
+				rigidbody2D.AddForce(new Vector2(forceX, forceY));
+				// Push the crawler in the opposite direction to null the impact force
+				forceX = -50.0f * rigidbody2D.velocity.x;
+				forceY = 0.0f;
+				coll.rigidbody.AddForce(new Vector2(forceX, forceY));
+				if (dieSound)
+				{
+					AudioSource.PlayClipAtPoint(dieSound, transform.position);
+				}
+				// Disable the robot's physics components
+				collider2D.enabled = false;
+				rigidbody2D.isKinematic = true;
 			}
 		}
 	}
@@ -240,9 +274,9 @@ public class Robot : MonoBehaviour
 					}
 					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				}
-			break;
-		}
-		case 3: //falling
+				break;
+			}
+			case 3: //falling
 			{
 				//Debug.Log("Falling");
 				// Determine direction of motion and move the robot
@@ -263,6 +297,20 @@ public class Robot : MonoBehaviour
 						forceX = runningSpeed * airDragCoefficient;
 					}
 					rigidbody2D.AddForce(new Vector2(forceX, forceY));
+				}
+				break;
+			}
+			case 4: //dying
+			{
+				//Debug.Log("Dying");
+				fadeOutTime += Time.deltaTime;
+				renderer.material.color = Color.Lerp(startColor, endColor, fadeOutTime/2);
+				if (renderer.material.color.a <= 0.0f)
+				{
+					float x = -2.0f;
+					float y = 1.64f;
+					Transform clone = Instantiate(robot, new Vector3(x, y, 0), Quaternion.identity) as Transform;
+					Destroy(gameObject);
 				}
 				break;
 			}

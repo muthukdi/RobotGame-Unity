@@ -11,10 +11,14 @@ public class AIPRobot : MonoBehaviour
 	public AudioClip jumpSound;
 	public AudioClip blockSound;
 	public AudioClip stompSound;
-	public float airDragCoefficient;
+	public AudioClip dieSound;
+	private float airDragCoefficient;
 	private float velocityY;
 	private AIPPlayerController controller;
 	private float bouncingSpeed;
+	private float fadeOutTime = 0.0f;
+	private Color startColor, endColor;
+	public Transform robot;
 	
 	// Use this for initialization
 	void Start ()
@@ -28,6 +32,8 @@ public class AIPRobot : MonoBehaviour
 		controller = GetComponent<AIPPlayerController>();
 		animator.SetInteger("AnimState", 0); //idle
 		airDragCoefficient = 0.5f;
+		startColor = renderer.material.color;
+		endColor = new Color(startColor.r, startColor.g, startColor.b, 0.0f);
 	}
 	
 	// collision callback
@@ -60,7 +66,7 @@ public class AIPRobot : MonoBehaviour
 			float absVelY = Mathf.Abs(rigidbody2D.velocity.y);
 			float forceX = 0.0f;
 			float forceY = 0.0f;
-			// If the robot is falling onto the crawler
+			// If the robot is falling onto the crawler, the crawler dies
 			if (animator.GetInteger("AnimState") == 3)
 			{
 				// Give it a little bounce
@@ -77,6 +83,34 @@ public class AIPRobot : MonoBehaviour
 				{
 					AudioSource.PlayClipAtPoint(stompSound, transform.position);
 				}
+				// Set the crawler's time to death
+				coll.gameObject.GetComponent<Crawler>().TimeToDeath = Time.time + 0.5f;
+				// Disabe the crawler's physics components so that it can no longer
+				// interact with the world.
+				coll.collider.enabled = false;
+				coll.rigidbody.isKinematic = true;
+			}
+			// If the robot bumps into the crawler while its idle or running, the robot dies
+			else if (animator.GetInteger("AnimState") < 2)
+			{
+				// Give it a little bounce
+				animator.SetInteger("AnimState", 4);
+				if (absVelY < maxVelocity.y)
+				{
+					forceY = bouncingSpeed;
+				}
+				rigidbody2D.AddForce(new Vector2(forceX, forceY));
+				// Push the crawler in the opposite direction to null the impact force
+				forceX = -50.0f * rigidbody2D.velocity.x;
+				forceY = 0.0f;
+				coll.rigidbody.AddForce(new Vector2(forceX, forceY));
+				if (dieSound)
+				{
+					AudioSource.PlayClipAtPoint(dieSound, transform.position);
+				}
+				// Disable the robot's physics components
+				collider2D.enabled = false;
+				rigidbody2D.isKinematic = true;
 			}
 		}
 	}
@@ -92,18 +126,94 @@ public class AIPRobot : MonoBehaviour
 		// Change behavior according to the current animation state
 		switch (animator.GetInteger("AnimState"))
 		{
-		case 0: //idle
-		{
-			//Debug.Log("Idle");
-			// Probably falling off the edge of a tile
-			if (velocityY < -0.5)
+			case 0: //idle
 			{
-				animator.SetInteger("AnimState", 3); //falling
+				//Debug.Log("Idle");
+				// Probably falling off the edge of a tile
+				if (velocityY < -0.5)
+				{
+					animator.SetInteger("AnimState", 3); //falling
+					break;
+				}
+				if (controller.Left || controller.Right)
+				{
+					animator.SetInteger("AnimState", 1); //running
+					// Determine direction of motion and move the robot
+					if (controller.Left)
+					{
+						transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+						if (absVelX < maxVelocity.x)
+						{
+							forceX = -runningSpeed;
+						}
+					}
+					if (controller.Right)
+					{
+						transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+						if (absVelX < maxVelocity.x)
+						{
+							forceX = runningSpeed;
+						}
+					}
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
+				}
+				// Repeated jumps are allowed here for smoother network response
+				if (controller.Jump)
+				{
+					Debug.Log("Jump pressed");
+					animator.SetInteger("AnimState", 2); //jumping
+					if (absVelY < maxVelocity.y)
+					{
+						forceY = jumpingSpeed;
+					}
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
+					if (jumpSound)
+					{
+						AudioSource.PlayClipAtPoint(jumpSound, transform.position);
+					}
+				}
 				break;
 			}
-			if (controller.Left || controller.Right)
+			case 1: //running
 			{
-				animator.SetInteger("AnimState", 1); //running
+				//Debug.Log("Running");
+				// Probably falling off the edge of a tile
+				if (velocityY < -0.5)
+				{
+					animator.SetInteger("AnimState", 3); //falling
+					break;
+				}
+				if (!(controller.Left || controller.Right))
+				{
+					animator.SetInteger("AnimState", 0); //idle
+					//Brake the momentum
+					if (rigidbody2D.velocity.x < 0.0f)
+					{
+						forceX = brakeSpeed * absVelX;
+					}
+					else if (rigidbody2D.velocity.x > 0.0f)
+					{
+						forceX = -brakeSpeed * absVelX;
+					}
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
+					break;
+				}
+				// Allow repeated jumps for smoother network response
+				if (controller.Jump)
+				{
+					Debug.Log("Jump pressed");
+					animator.SetInteger("AnimState", 2); //jumping
+					if (absVelY < maxVelocity.y)
+					{
+						forceY = jumpingSpeed;
+					}
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
+					if (jumpSound)
+					{
+						AudioSource.PlayClipAtPoint(jumpSound, transform.position);
+					}
+					break;
+				}
 				// Determine direction of motion and move the robot
 				if (controller.Left)
 				{
@@ -112,6 +222,7 @@ public class AIPRobot : MonoBehaviour
 					{
 						forceX = -runningSpeed;
 					}
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				}
 				if (controller.Right)
 				{
@@ -120,143 +231,83 @@ public class AIPRobot : MonoBehaviour
 					{
 						forceX = runningSpeed;
 					}
-				}
-				rigidbody2D.AddForce(new Vector2(forceX, forceY));
-			}
-			// Repeated jumps are allowed here for smoother network response
-			if (controller.Jump)
-			{
-				Debug.Log("Jump pressed");
-				animator.SetInteger("AnimState", 2); //jumping
-				if (absVelY < maxVelocity.y)
-				{
-					forceY = jumpingSpeed;
-				}
-				rigidbody2D.AddForce(new Vector2(forceX, forceY));
-				if (jumpSound)
-				{
-					AudioSource.PlayClipAtPoint(jumpSound, transform.position);
-				}
-			}
-			break;
-		}
-		case 1: //running
-		{
-			//Debug.Log("Running");
-			// Probably falling off the edge of a tile
-			if (velocityY < -0.5)
-			{
-				animator.SetInteger("AnimState", 3); //falling
-				break;
-			}
-			if (!(controller.Left || controller.Right))
-			{
-				animator.SetInteger("AnimState", 0); //idle
-				//Brake the momentum
-				if (rigidbody2D.velocity.x < 0.0f)
-				{
-					forceX = brakeSpeed * absVelX;
-				}
-				else if (rigidbody2D.velocity.x > 0.0f)
-				{
-					forceX = -brakeSpeed * absVelX;
-				}
-				rigidbody2D.AddForce(new Vector2(forceX, forceY));
-				break;
-			}
-			// Allow repeated jumps for smoother network response
-			if (controller.Jump)
-			{
-				Debug.Log("Jump pressed");
-				animator.SetInteger("AnimState", 2); //jumping
-				if (absVelY < maxVelocity.y)
-				{
-					forceY = jumpingSpeed;
-				}
-				rigidbody2D.AddForce(new Vector2(forceX, forceY));
-				if (jumpSound)
-				{
-					AudioSource.PlayClipAtPoint(jumpSound, transform.position);
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				}
 				break;
 			}
-			// Determine direction of motion and move the robot
-			if (controller.Left)
+			case 2: //jumping
 			{
-				transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
-				if (absVelX < maxVelocity.x)
+				//Debug.Log("Jumping");
+				// Has reached the top of a jump
+				if (velocityY < -0.5)
 				{
-					forceX = -runningSpeed;
+					animator.SetInteger("AnimState", 3); //falling
 				}
-				rigidbody2D.AddForce(new Vector2(forceX, forceY));
-			}
-			if (controller.Right)
-			{
-				transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-				if (absVelX < maxVelocity.x)
+				// Determine direction of motion and move the robot
+				if (controller.Left)
 				{
-					forceX = runningSpeed;
+					transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+					if (absVelX < maxVelocity.x)
+					{
+						forceX = -runningSpeed * airDragCoefficient;
+					}
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				}
-				rigidbody2D.AddForce(new Vector2(forceX, forceY));
-			}
-			break;
-		}
-		case 2: //jumping
-		{
-			//Debug.Log("Jumping");
-			// Has reached the top of a jump
-			if (velocityY < -0.5)
-			{
-				animator.SetInteger("AnimState", 3); //falling
-			}
-			// Determine direction of motion and move the robot
-			if (controller.Left)
-			{
-				transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
-				if (absVelX < maxVelocity.x)
+				if (controller.Right)
 				{
-					forceX = -runningSpeed * airDragCoefficient;
+					transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+					if (absVelX < maxVelocity.x)
+					{
+						forceX = runningSpeed * airDragCoefficient;
+					}
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				}
-				rigidbody2D.AddForce(new Vector2(forceX, forceY));
+				break;
 			}
-			if (controller.Right)
+			case 3: //falling
 			{
-				transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-				if (absVelX < maxVelocity.x)
+				//Debug.Log("Falling");
+				// Determine direction of motion and move the robot
+				if (controller.Left)
 				{
-					forceX = runningSpeed * airDragCoefficient;
+					transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+					if (absVelX < maxVelocity.x)
+					{
+						forceX = -runningSpeed * airDragCoefficient;
+					}
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				}
-				rigidbody2D.AddForce(new Vector2(forceX, forceY));
+				if (controller.Right)
+				{
+					transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+					if (absVelX < maxVelocity.x)
+					{
+						forceX = runningSpeed * airDragCoefficient;
+					}
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
+				}
+				break;
 			}
-			break;
-		}
-		case 3: //falling
-		{
-			//Debug.Log("Falling");
-			// Determine direction of motion and move the robot
-			if (controller.Left)
+			case 4: //dying
 			{
-				transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
-				if (absVelX < maxVelocity.x)
+				//Debug.Log("Dying");
+				fadeOutTime += Time.deltaTime;
+				renderer.material.color = Color.Lerp(startColor, endColor, fadeOutTime/2);
+				if (renderer.material.color.a <= 0.0f)
 				{
-					forceX = -runningSpeed * airDragCoefficient;
+					string clientId = controller.clientID;
+					float x = -2.0f;
+					float y = 1.64f;
+					Transform clone = Instantiate(robot, new Vector3(x, y, 0), Quaternion.identity) as Transform;
+					AIPPlayerController clone_controller = clone.GetComponent<AIPPlayerController>();
+					clone_controller.clientID = clientId;
+					Destroy(gameObject);
 				}
-				rigidbody2D.AddForce(new Vector2(forceX, forceY));
+				break;
 			}
-			if (controller.Right)
-			{
-				transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-				if (absVelX < maxVelocity.x)
-				{
-					forceX = runningSpeed * airDragCoefficient;
-				}
-				rigidbody2D.AddForce(new Vector2(forceX, forceY));
-			}
-			break;
-		}
-		default:
-			// Shouldn't happen
-			break;
+			default:
+				// Shouldn't happen
+				break;
 		}
 	}
 	
