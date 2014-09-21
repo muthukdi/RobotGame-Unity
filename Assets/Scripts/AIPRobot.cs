@@ -18,7 +18,6 @@ public class AIPRobot : MonoBehaviour
 	private float bouncingSpeed;
 	private float fadeOutTime = 0.0f;
 	private Color startColor, endColor;
-	public Transform robot;
 	
 	// Use this for initialization
 	void Start ()
@@ -63,7 +62,6 @@ public class AIPRobot : MonoBehaviour
 		}
 		else if (coll.gameObject.tag == "crawler")
 		{
-			float absVelY = Mathf.Abs(rigidbody2D.velocity.y);
 			float forceX = 0.0f;
 			float forceY = 0.0f;
 			// If the robot is falling onto the crawler, the crawler dies
@@ -71,10 +69,7 @@ public class AIPRobot : MonoBehaviour
 			{
 				// Give it a little bounce
 				animator.SetInteger("AnimState", 2);
-				if (absVelY < maxVelocity.y)
-				{
-					forceY = bouncingSpeed;
-				}
+				forceY = bouncingSpeed;
 				rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				// Get the crawler's animator and change its state to dying
 				Animator crawlerAnimator = coll.gameObject.GetComponent<Animator>();
@@ -95,10 +90,7 @@ public class AIPRobot : MonoBehaviour
 			{
 				// Give it a little bounce
 				animator.SetInteger("AnimState", 4);
-				if (absVelY < maxVelocity.y)
-				{
-					forceY = bouncingSpeed;
-				}
+				forceY = bouncingSpeed;
 				rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				// Push the crawler in the opposite direction to null the impact force
 				forceX = -50.0f * rigidbody2D.velocity.x;
@@ -295,13 +287,17 @@ public class AIPRobot : MonoBehaviour
 				renderer.material.color = Color.Lerp(startColor, endColor, fadeOutTime/2);
 				if (renderer.material.color.a <= 0.0f)
 				{
-					string clientId = controller.clientID;
-					float x = -2.0f;
-					float y = 1.64f;
-					Transform clone = Instantiate(robot, new Vector3(x, y, 0), Quaternion.identity) as Transform;
-					AIPPlayerController clone_controller = clone.GetComponent<AIPPlayerController>();
-					clone_controller.clientID = clientId;
-					Destroy(gameObject);
+					// I shouldn't be hard-coding this
+					transform.position = new Vector3(-1.757616f, 1.636222f, 0);
+					// Reset the state back to idle
+					animator.SetInteger("AnimState", 0); //idle
+					// Re-enable the robot's physics components
+					collider2D.enabled = true;
+					rigidbody2D.isKinematic = false;
+					// Make the robot visible again
+					renderer.material.color = new Color(startColor.r, startColor.g, startColor.b, startColor.a);
+					// Reset the fade out time
+					fadeOutTime = 0.0f;
 				}
 				break;
 			}

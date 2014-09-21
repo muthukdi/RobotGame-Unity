@@ -28,7 +28,7 @@ public class Crawler : MonoBehaviour
 		walkingSpeeds[1] = 0.6f;
 		walkingSpeeds[2] = 0.9f;
 		maxVelocity = new Vector2(walkingSpeeds[Random.Range(0, 3)], 0.0f);
-		direction = Random.Range(0, 2) > 1 ? 1 : -1;
+		direction = Random.Range(0, 2) == 1 ? 1 : -1;
 		transform.localScale = direction < 0 ? new Vector3(1.0f, 1.0f, 1.0f) : new Vector3(-1.0f, 1.0f, 1.0f);
 	}
 
@@ -81,7 +81,7 @@ public class Crawler : MonoBehaviour
 				if (Time.time > nextThinkTime)
 				{
 					animator.SetInteger("AnimState", 1); //walking
-					nextThinkTime = Time.time + 3.0f;
+					nextThinkTime = Time.time + Random.Range(2.0f, 4.0f);
 					// Change the walking speed randomly
 					maxVelocity = new Vector2(walkingSpeeds[Random.Range(0, 3)], 0.0f);
 					animator.speed = maxVelocity.x/0.3f;
@@ -93,7 +93,7 @@ public class Crawler : MonoBehaviour
 				if (Time.time > nextThinkTime)
 				{
 					animator.SetInteger("AnimState", 0); //idle
-					nextThinkTime = Time.time + 3.0f;
+					nextThinkTime = Time.time + Random.Range(2.0f, 4.0f);
 					//Brake the momentum
 					if (velocityX < 0.0f)
 					{
