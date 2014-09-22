@@ -19,6 +19,10 @@ public class PlayerController : MonoBehaviour
 		{
 			return LEFT;
 		}
+		set
+		{
+			LEFT = value;
+		}
 	}
 
 	public bool Right
@@ -27,6 +31,10 @@ public class PlayerController : MonoBehaviour
 		{
 			return RIGHT;
 		}
+		set
+		{
+			RIGHT = value;
+		}
 	}
 
 	public bool Jump
@@ -34,6 +42,10 @@ public class PlayerController : MonoBehaviour
 		get
 		{
 			return JUMP;
+		}
+		set
+		{
+			JUMP = value;
 		}
 	}
 
