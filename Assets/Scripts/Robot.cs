@@ -24,10 +24,10 @@ public class Robot : MonoBehaviour
 	void Start ()
 	{
 		runningSpeed = 10.0f;
-		jumpingSpeed = 250.0f;
+		jumpingSpeed = 260.0f;
 		brakeSpeed = 25.0f;
 		bouncingSpeed = 100.0f;
-		maxVelocity = new Vector2(2.5f, 100.0f);
+		maxVelocity = new Vector2(2.5f, 50.0f);
 		animator = GetComponent<Animator>();
 		controller = GetComponent<PlayerController>();
 		jumpEnabled = true;
@@ -90,21 +90,11 @@ public class Robot : MonoBehaviour
 			// If the robot bumps into the crawler while its idle or running, the robot dies
 			else if (animator.GetInteger("AnimState") < 2)
 			{
-				// Give it a little bounce
-				animator.SetInteger("AnimState", 4);
-				forceY = bouncingSpeed;
-				rigidbody2D.AddForce(new Vector2(forceX, forceY));
 				// Push the crawler in the opposite direction to null the impact force
 				forceX = -50.0f * rigidbody2D.velocity.x;
 				forceY = 0.0f;
 				coll.rigidbody.AddForce(new Vector2(forceX, forceY));
-				if (dieSound)
-				{
-					AudioSource.PlayClipAtPoint(dieSound, transform.position);
-				}
-				// Disable the robot's physics components
-				collider2D.enabled = false;
-				rigidbody2D.isKinematic = true;
+				PrepareToDie();
 			}
 		}
 	}
@@ -117,6 +107,15 @@ public class Robot : MonoBehaviour
 		float absVelX = Mathf.Abs(rigidbody2D.velocity.x);
 		float absVelY = Mathf.Abs(rigidbody2D.velocity.y);
 		velocityY = rigidbody2D.velocity.y;
+		// Kill the robot if it's head goes below the camera view
+		if (animator.GetInteger ("AnimState") != 4) 
+		{
+			float bottom = Camera.main.ViewportToWorldPoint(Vector3.zero).y;
+			if (transform.position.y < bottom)
+			{
+				PrepareToDie();
+			}
+		}
 		// Change behavior according to the current animation state
 		switch (animator.GetInteger("AnimState"))
 		{
@@ -317,6 +316,20 @@ public class Robot : MonoBehaviour
 				// Shouldn't happen
 				break;
 		}
+	}
+
+	void PrepareToDie()
+	{
+		animator.SetInteger("AnimState", 4);
+		// Give it a little bounce
+		rigidbody2D.AddForce(new Vector2(0.0f, bouncingSpeed));
+		if (dieSound)
+		{
+			AudioSource.PlayClipAtPoint(dieSound, transform.position);
+		}
+		// Disable the robot's physics components
+		collider2D.enabled = false;
+		rigidbody2D.isKinematic = true;
 	}
 	
 }
