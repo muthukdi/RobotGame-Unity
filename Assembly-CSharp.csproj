@@ -49,6 +49,7 @@
      <Compile Include="Assets\Scripts\AIPGameController.cs" />
      <Compile Include="Assets\Scripts\AIPPlayerController.cs" />
      <Compile Include="Assets\Scripts\AIPRobot.cs" />
+     <Compile Include="Assets\Scripts\BrokenTile.cs" />
      <Compile Include="Assets\Scripts\CameraScript.cs" />
      <Compile Include="Assets\Scripts\Collectible.cs" />
      <Compile Include="Assets\Scripts\Crawler.cs" />
