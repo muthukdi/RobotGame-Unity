@@ -20,8 +20,13 @@ public class BrokenTile : MonoBehaviour
 	{
 		if (coll.gameObject.tag == "Player")
 		{
-			rigidbody2D.isKinematic = false;
-			rigidbody2D.AddForce(new Vector2(0.0f, 150.0f));
+			Animator robotAnimator = coll.gameObject.GetComponent<Animator>();
+			// If the robot is jumping
+			if (robotAnimator.GetInteger("AnimState") == 2)
+			{
+				rigidbody2D.isKinematic = false;
+				rigidbody2D.AddForce(new Vector2(0.0f, 150.0f));
+			}
 		}
 	}
 	

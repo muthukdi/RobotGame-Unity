@@ -45,20 +45,34 @@ public class Robot : MonoBehaviour
 		{
 			return;
 		}
+		// Get the normal vector of the contact point
+		Vector2 normal = coll.contacts[0].normal;
 		// When the robot collides with a floor
 		if (coll.gameObject.tag == "floor")
 		{
 			// Falling
 			if (animator.GetInteger("AnimState") == 3)
 			{
-				animator.SetInteger("AnimState", 0); //idle
+				if (Mathf.Round(normal.y) == 1)
+				{
+					animator.SetInteger("AnimState", 0); //idle
+				}
 			}
 			// Jumping
 			else if (animator.GetInteger("AnimState") == 2)
 			{
-				if (blockSound)
+				if (Mathf.Round(normal.y) == -1)
 				{
-					AudioSource.PlayClipAtPoint(blockSound, transform.position);
+					if (blockSound)
+					{
+						AudioSource.PlayClipAtPoint(blockSound, transform.position);
+					}
+				}
+				// Hopefully, this fixes the bug where the robot gets onto
+				// a platform while it is still in the jumping state!
+				else if (Mathf.Round(normal.y) == 1)
+				{
+					animator.SetInteger("AnimState", 0); //idle
 				}
 			}
 		}
