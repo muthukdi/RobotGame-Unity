@@ -18,6 +18,8 @@ public class AIPRobot : MonoBehaviour
 	private float bouncingSpeed;
 	private float fadeOutTime = 0.0f;
 	private Color startColor, endColor;
+	private ArrayList redSpawnPoints;
+	private ArrayList blueSpawnPoints;
 	
 	// Use this for initialization
 	void Start ()
@@ -33,6 +35,7 @@ public class AIPRobot : MonoBehaviour
 		airDragCoefficient = 0.5f;
 		startColor = renderer.material.color;
 		endColor = new Color(startColor.r, startColor.g, startColor.b, 0.0f);
+		createSpawnPoints();
 	}
 	
 	// collision callback
@@ -82,31 +85,23 @@ public class AIPRobot : MonoBehaviour
 			if (animator.GetInteger("AnimState") == 3)
 			{
 				// The crawler must die in this case
-				if (Mathf.Round(normal.y) == 1)
+				// Give it a little bounce
+				animator.SetInteger("AnimState", 2);
+				forceY = bouncingSpeed;
+				rigidbody2D.AddForce(new Vector2(forceX, forceY));
+				// Get the crawler's animator and change its state to dying
+				Animator crawlerAnimator = coll.gameObject.GetComponent<Animator>();
+				crawlerAnimator.SetInteger("AnimState", 2);
+				if (stompSound)
 				{
-					// Give it a little bounce
-					animator.SetInteger("AnimState", 2);
-					forceY = bouncingSpeed;
-					rigidbody2D.AddForce(new Vector2(forceX, forceY));
-					// Get the crawler's animator and change its state to dying
-					Animator crawlerAnimator = coll.gameObject.GetComponent<Animator>();
-					crawlerAnimator.SetInteger("AnimState", 2);
-					if (stompSound)
-					{
-						AudioSource.PlayClipAtPoint(stompSound, transform.position);
-					}
-					// Set the crawler's time to death
-					coll.gameObject.GetComponent<Crawler>().TimeToDeath = Time.time + 0.5f;
-					// Disabe the crawler's physics components so that it can no longer
-					// interact with the world.
-					coll.collider.enabled = false;
-					coll.rigidbody.isKinematic = true;
+					AudioSource.PlayClipAtPoint(stompSound, transform.position);
 				}
-				// The robot must die in this case
-				else if (Mathf.Round(normal.x) == -1 || Mathf.Round(normal.x) == 1)
-				{
-					PrepareToDie();
-				}
+				// Set the crawler's time to death
+				coll.gameObject.GetComponent<Crawler>().TimeToDeath = Time.time + 0.5f;
+				// Disabe the crawler's physics components so that it can no longer
+				// interact with the world.
+				coll.collider.enabled = false;
+				coll.rigidbody.isKinematic = true;
 			}
 			// If the robot bumps into the crawler while its jumping, the robot dies
 			else if (animator.GetInteger("AnimState") == 2)
@@ -329,8 +324,33 @@ public class AIPRobot : MonoBehaviour
 				renderer.material.color = Color.Lerp(startColor, endColor, fadeOutTime/2);
 				if (renderer.material.color.a <= 0.0f)
 				{
-					// I shouldn't be hard-coding this
-					transform.position = new Vector3(-1.757616f, 1.636222f, 0);
+					// We need to choose a spawn point within upper half of the camera view
+					Vector3 spawnPoint = Vector3.zero;
+					float top = Camera.main.ViewportToWorldPoint(Vector3.up).y;
+					float middle = Camera.main.ViewportToWorldPoint(new Vector3(0.0f, 0.5f, 0.0f)).y;
+					if (controller.team == "Red")
+					{
+						foreach (Vector3 vector in redSpawnPoints)
+						{
+							if (vector.y < top && vector.y > middle)
+							{
+								spawnPoint = vector;
+								break;
+							}
+						}
+					}
+					else
+					{
+						foreach (Vector3 vector in blueSpawnPoints)
+						{
+							if (vector.y < top && vector.y > middle)
+							{
+								spawnPoint = vector;
+								break;
+							}
+						}
+					}
+					transform.position = spawnPoint;
 					// Reset the state back to idle
 					animator.SetInteger("AnimState", 0); //idle
 					// Re-enable the robot's physics components
@@ -361,6 +381,28 @@ public class AIPRobot : MonoBehaviour
 		// Disable the robot's physics components
 		collider2D.enabled = false;
 		rigidbody2D.isKinematic = true;
+	}
+
+	void createSpawnPoints()
+	{
+		redSpawnPoints = new ArrayList();
+		blueSpawnPoints = new ArrayList();
+		redSpawnPoints.Add(new Vector3(-3.599096f, 1.594519f, 0.0f));
+		redSpawnPoints.Add(new Vector3(-3.599096f, 4.041722f, 0.0f));
+		redSpawnPoints.Add(new Vector3(-1.564676f, 5.426082f, 0.0f));
+		redSpawnPoints.Add(new Vector3(-3.599096f, 6.584653f, 0.0f));
+		redSpawnPoints.Add(new Vector3(-1.564676f, 7.866363f, 0.0f));
+		redSpawnPoints.Add(new Vector3(-0.318982f, 9.126759f, 0.0f));
+		redSpawnPoints.Add(new Vector3(-3.599096f, 10.45236f, 0.0f));
+		redSpawnPoints.Add(new Vector3(-3.599096f, 12.56025f, 0.0f));
+		blueSpawnPoints.Add(new Vector3(-0.383328f, 1.594519f, 0.0f));
+		blueSpawnPoints.Add(new Vector3(-0.383328f, 4.041722f, 0.0f));
+		blueSpawnPoints.Add(new Vector3(2.433801f, 5.426082f, 0.0f));
+		blueSpawnPoints.Add(new Vector3(-0.383328f, 6.584653f, 0.0f));
+		blueSpawnPoints.Add(new Vector3(2.433801f, 7.866363f, 0.0f));
+		blueSpawnPoints.Add(new Vector3(-0.383328f, 9.126759f, 0.0f));
+		blueSpawnPoints.Add(new Vector3(3.677406f, 10.45236f, 0.0f));
+		blueSpawnPoints.Add(new Vector3(3.677406f, 12.56025f, 0.0f));
 	}
 	
 }

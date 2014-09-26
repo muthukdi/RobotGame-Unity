@@ -11,6 +11,7 @@ public class AIPPlayerController : AIPEventListener
 	private bool RIGHT;
 	private bool JUMP;
 	public string clientID;
+	public string team;
 	
 	// Use this for initialization
 	void Start ()

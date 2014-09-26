@@ -8,7 +8,7 @@ public class CameraScript : MonoBehaviour
 	void Start ()
 	{
 		timeToGo = Time.fixedTime + 0.075f;
-		transform.position = new Vector3(transform.position.x, transform.position.y + 1.5f, transform.position.z);
+		//transform.position = new Vector3(transform.position.x, transform.position.y + 1.5f, transform.position.z);
 	}
 	
 	// Update is called once per frame
@@ -18,7 +18,7 @@ public class CameraScript : MonoBehaviour
 		if (Time.fixedTime > timeToGo)
 		{
 			timeToGo = Time.fixedTime + 0.1f;
-			//transform.position = new Vector3(transform.position.x, transform.position.y + 0.01f, transform.position.z);
+			transform.position = new Vector3(transform.position.x, transform.position.y + 0.01f, transform.position.z);
 			camera.backgroundColor = new Color(camera.backgroundColor.r - 0.001f, 
 			                                   camera.backgroundColor.g - 0.001f, 
 			                                   camera.backgroundColor.b - 0.001f,
