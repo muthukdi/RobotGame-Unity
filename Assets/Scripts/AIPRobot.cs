@@ -78,34 +78,63 @@ public class AIPRobot : MonoBehaviour
 		{
 			float forceX = 0.0f;
 			float forceY = 0.0f;
-			// If the robot is falling onto the crawler, the crawler dies
+			// If the robot is falling onto the crawler
 			if (animator.GetInteger("AnimState") == 3)
 			{
-				// Give it a little bounce
-				animator.SetInteger("AnimState", 2);
-				forceY = bouncingSpeed;
-				rigidbody2D.AddForce(new Vector2(forceX, forceY));
-				// Get the crawler's animator and change its state to dying
-				Animator crawlerAnimator = coll.gameObject.GetComponent<Animator>();
-				crawlerAnimator.SetInteger("AnimState", 2);
-				if (stompSound)
+				// The crawler must die in this case
+				if (Mathf.Round(normal.y) == 1)
 				{
-					AudioSource.PlayClipAtPoint(stompSound, transform.position);
+					// Give it a little bounce
+					animator.SetInteger("AnimState", 2);
+					forceY = bouncingSpeed;
+					rigidbody2D.AddForce(new Vector2(forceX, forceY));
+					// Get the crawler's animator and change its state to dying
+					Animator crawlerAnimator = coll.gameObject.GetComponent<Animator>();
+					crawlerAnimator.SetInteger("AnimState", 2);
+					if (stompSound)
+					{
+						AudioSource.PlayClipAtPoint(stompSound, transform.position);
+					}
+					// Set the crawler's time to death
+					coll.gameObject.GetComponent<Crawler>().TimeToDeath = Time.time + 0.5f;
+					// Disabe the crawler's physics components so that it can no longer
+					// interact with the world.
+					coll.collider.enabled = false;
+					coll.rigidbody.isKinematic = true;
 				}
-				// Set the crawler's time to death
-				coll.gameObject.GetComponent<Crawler>().TimeToDeath = Time.time + 0.5f;
-				// Disabe the crawler's physics components so that it can no longer
-				// interact with the world.
-				coll.collider.enabled = false;
-				coll.rigidbody.isKinematic = true;
+				// The robot must die in this case
+				else if (Mathf.Round(normal.x) == -1 || Mathf.Round(normal.x) == 1)
+				{
+					PrepareToDie();
+				}
 			}
-			// If the robot bumps into the crawler while its idle or running, the robot dies
-			else if (animator.GetInteger("AnimState") < 2)
+			// If the robot bumps into the crawler while its jumping, the robot dies
+			else if (animator.GetInteger("AnimState") == 2)
 			{
-				// Push the crawler in the opposite direction to null the impact force
-				forceX = -50.0f * rigidbody2D.velocity.x;
-				forceY = 0.0f;
-				coll.rigidbody.AddForce(new Vector2(forceX, forceY));
+				if (Mathf.Round(normal.y) == -1 || Mathf.Round(normal.x) == -1 || Mathf.Round(normal.x) == 1)
+				{
+					// Push the crawler in the opposite direction to null the impact force
+					forceX = 0.0f;
+					forceY = -50.0f * rigidbody2D.velocity.x;
+					coll.rigidbody.AddForce(new Vector2(forceX, forceY));
+					PrepareToDie();
+				}
+			}
+			// If the robot bumps into the crawler while its running, the robot dies
+			else if (animator.GetInteger("AnimState") == 1)
+			{
+				if (Mathf.Round(normal.x) == -1 || Mathf.Round(normal.x) == 1)
+				{
+					// Push the crawler in the opposite direction to null the impact force
+					forceX = -50.0f * rigidbody2D.velocity.x;
+					forceY = 0.0f;
+					coll.rigidbody.AddForce(new Vector2(forceX, forceY));
+					PrepareToDie();
+				}
+			}
+			// If the robot bumps into the crawler while its idle, the robot dies
+			else if (animator.GetInteger("AnimState") == 0)
+			{
 				PrepareToDie();
 			}
 		}
