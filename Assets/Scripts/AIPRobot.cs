@@ -404,12 +404,12 @@ public class AIPRobot : MonoBehaviour
 		redSpawnPoints.Add(new Vector3(-0.318982f, 9.126759f, 0.0f));
 		redSpawnPoints.Add(new Vector3(-3.599096f, 10.45236f, 0.0f));
 		redSpawnPoints.Add(new Vector3(-3.599096f, 12.56025f, 0.0f));
-		blueSpawnPoints.Add(new Vector3(-0.383328f, 1.594519f, 0.0f));
-		blueSpawnPoints.Add(new Vector3(-0.383328f, 4.041722f, 0.0f));
+		blueSpawnPoints.Add(new Vector3(0.383328f, 1.594519f, 0.0f));
+		blueSpawnPoints.Add(new Vector3(0.383328f, 4.041722f, 0.0f));
 		blueSpawnPoints.Add(new Vector3(2.433801f, 5.426082f, 0.0f));
-		blueSpawnPoints.Add(new Vector3(-0.383328f, 6.584653f, 0.0f));
+		blueSpawnPoints.Add(new Vector3(0.383328f, 6.584653f, 0.0f));
 		blueSpawnPoints.Add(new Vector3(2.433801f, 7.866363f, 0.0f));
-		blueSpawnPoints.Add(new Vector3(-0.383328f, 9.126759f, 0.0f));
+		blueSpawnPoints.Add(new Vector3(0.383328f, 9.126759f, 0.0f));
 		blueSpawnPoints.Add(new Vector3(3.677406f, 10.45236f, 0.0f));
 		blueSpawnPoints.Add(new Vector3(3.677406f, 12.56025f, 0.0f));
 	}
