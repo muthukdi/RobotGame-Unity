@@ -25,7 +25,7 @@ public class BrokenTile : MonoBehaviour
 			if (robotAnimator.GetInteger("AnimState") == 2)
 			{
 				rigidbody2D.isKinematic = false;
-				rigidbody2D.AddForce(new Vector2(0.0f, 150.0f));
+				rigidbody2D.AddForce(new Vector2(0.0f, 70.0f));
 			}
 		}
 	}

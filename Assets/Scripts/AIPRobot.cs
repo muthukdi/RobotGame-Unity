@@ -33,18 +33,18 @@ public class AIPRobot : MonoBehaviour
 		controller = GetComponent<AIPPlayerController>();
 		animator.SetInteger("AnimState", 0); //idle
 		airDragCoefficient = 0.5f;
-		startColor = renderer.material.color;
-		endColor = new Color(startColor.r, startColor.g, startColor.b, 0.0f);
 		createSpawnPoints();
 		// Set the color of the player according to their team
 		if (controller.team == "Red")
 		{
-			renderer.material.color = new Color(startColor.r, 0.5f, 0.5f);
+			renderer.material.color = new Color(renderer.material.color.r, 0.5f, 0.5f);
 		}
 		else
 		{
-			renderer.material.color = new Color(0.5f, 0.5f, startColor.b);
+			renderer.material.color = new Color(0.5f, 0.5f, renderer.material.color.b);
 		}
+		startColor = renderer.material.color;
+		endColor = new Color(startColor.r, startColor.g, startColor.b, 0.0f);
 	}
 	
 	// collision callback

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using AIPFramework;
@@ -92,11 +91,24 @@ public class AIPGameController : AIPEventListener
 	
 	void OnApplicationPause(bool pauseStatus)
 	{
+		// If this script is not enabled
+		if (!enabled)
+		{
+			return;
+		}
 		Application.Quit ();
 	}
 	void OnApplicationQuit()
 	{
-		myNetwork.Disconnect ();
+		// If this script is not enabled
+		if (!enabled)
+		{
+			return;
+		}
+		if (myNetwork != null)
+		{
+			myNetwork.Disconnect ();
+		}
 		Debug.Log("Just disconnected the network"); 
 	}
 	
