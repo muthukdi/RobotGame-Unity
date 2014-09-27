@@ -31,14 +31,10 @@ public class AIPPlayerController : AIPEventListener
 				bool jump = false;
 				if (name == "ControllerEvent") 
 				{
-					JsonObject json = SimpleJson.SimpleJson.DeserializeObject (data) as JsonObject;
+					JsonObject json = SimpleJson.SimpleJson.DeserializeObject(data) as JsonObject;
 					left = System.Convert.ToBoolean (json ["left"]);
 					right = System.Convert.ToBoolean (json ["right"]);
 					jump = System.Convert.ToBoolean (json ["jump"]);
-					if (left != LEFT || right != RIGHT || jump != JUMP)
-					{
-						//Debug.Log(data);
-					}
 					lock (this)
 					{
 						LEFT = left;

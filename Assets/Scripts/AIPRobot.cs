@@ -22,7 +22,7 @@ public class AIPRobot : MonoBehaviour
 	private ArrayList blueSpawnPoints;
 	
 	// Use this for initialization
-	void Start ()
+	void Start()
 	{
 		runningSpeed = 10.0f;
 		jumpingSpeed = 260.0f;
@@ -36,6 +36,15 @@ public class AIPRobot : MonoBehaviour
 		startColor = renderer.material.color;
 		endColor = new Color(startColor.r, startColor.g, startColor.b, 0.0f);
 		createSpawnPoints();
+		// Set the color of the player according to their team
+		if (controller.team == "Red")
+		{
+			renderer.material.color = new Color(startColor.r, 0.5f, 0.5f);
+		}
+		else
+		{
+			renderer.material.color = new Color(0.5f, 0.5f, startColor.b);
+		}
 	}
 	
 	// collision callback

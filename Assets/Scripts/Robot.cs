@@ -19,10 +19,10 @@ public class Robot : MonoBehaviour
 	private float bouncingSpeed;
 	private float fadeOutTime = 0.0f;
 	private Color startColor, endColor;
-	private ArrayList spawnPoints
+	private ArrayList spawnPoints;
 
 	// Use this for initialization
-	void Start ()
+	void Start()
 	{
 		runningSpeed = 10.0f;
 		jumpingSpeed = 260.0f;
@@ -339,7 +339,7 @@ public class Robot : MonoBehaviour
 					Vector3 spawnPoint = Vector3.zero;
 					float top = Camera.main.ViewportToWorldPoint(Vector3.up).y;
 					float middle = Camera.main.ViewportToWorldPoint(new Vector3(0.0f, 0.5f, 0.0f)).y;
-					foreach (Vector3 vector in redSpawnPoints)
+					foreach (Vector3 vector in spawnPoints)
 					{
 						if (vector.y < top && vector.y > middle)
 						{
